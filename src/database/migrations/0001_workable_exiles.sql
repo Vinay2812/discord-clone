@@ -1,0 +1,2 @@
+ALTER TABLE `DiscordServer` MODIFY COLUMN `invite_code` varchar(100) NOT NULL;--> statement-breakpoint
+ALTER TABLE `DiscordServer` ADD CONSTRAINT `DiscordServer_invite_code_unique` UNIQUE(`invite_code`);
