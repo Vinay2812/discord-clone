@@ -1,7 +1,7 @@
-import { createFallback, withTryCatch } from "../../../lib/utils";
+import { createFallback, withTryCatch } from "@/lib/utils";
 import { Member, NewMember } from "./schema";
-import { db } from "../../db";
-import { memberSchema, profileSchema, serverSchema } from "..";
+import { db } from "@/database/db";
+import { memberSchema, profileSchema, serverSchema } from "@/database/models";
 import { eq, sql, and, ne } from "drizzle-orm";
 
 const preparedSelectMemberQuery = db
@@ -47,6 +47,16 @@ const selectMembersByServerIdWithProfileQuery = db
     .where(eq(memberSchema.serverId, sql.placeholder("serverId")))
     .innerJoin(profileSchema, eq(memberSchema.profileId, profileSchema.id))
     .orderBy(memberSchema.role);
+
+const deleteMemberPreparedQuery = db
+    .delete(memberSchema)
+    .where(
+        and(
+            eq(memberSchema.id, sql.placeholder("memberId")),
+            ne(memberSchema.profileId, sql.placeholder("profileId")),
+            eq(memberSchema.serverId, sql.placeholder("serverId")),
+        ),
+    );
 
 export const createMember = async (member: NewMember) => {
     const insertFallback = createFallback("Error creating member:");
@@ -96,4 +106,31 @@ export const updateServerMemberRole = async (
     };
 
     return withTryCatch(updateQuery, updateFallback)();
+};
+
+export const deleteMember = async (
+    memberId: string,
+    serverId: string,
+    profileId: string,
+) => {
+    const fallback = createFallback("Error deleting member:");
+
+    const callback = async () => {
+        const server = await serverExistsPreparedQuery.execute({
+            serverId,
+            profileId,
+        });
+        if (!server.length) {
+            throw new Error("Server does not exist");
+        }
+
+        await deleteMemberPreparedQuery.execute({
+            memberId,
+            profileId,
+            serverId,
+        });
+        return server[0].serverId;
+    };
+
+    return withTryCatch(callback, fallback)();
 };
