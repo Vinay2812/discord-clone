@@ -12,7 +12,7 @@ const userServersPreparedQuery = db
     })
     .from(serverSchema)
     .leftJoin(memberSchema, eq(memberSchema.serverId, serverSchema.id))
-    .where(eq(serverSchema.profileId, sql.placeholder("profileId")))
+    .where(eq(memberSchema.profileId, sql.placeholder("profileId")))
     .limit(1)
     .prepare();
 
@@ -29,7 +29,6 @@ function getUserServers(profileId: string) {
 const SetupPage = async () => {
     const profile = await initialProfile();
     const servers = await getUserServers(profile.id);
-
     if (servers.length > 0) {
         const serverId = servers[0].id;
         return redirect(`/servers/${serverId}`);

@@ -16,7 +16,9 @@ type Props = {
 };
 
 const serverOfUserPreparedQuery = db
-    .select()
+    .select({
+        serverId: serverSchema.id,
+    })
     .from(serverSchema)
     .where(eq(serverSchema.id, sql.placeholder("serverId")))
     .leftJoin(memberSchema, eq(serverSchema.id, memberSchema.serverId))

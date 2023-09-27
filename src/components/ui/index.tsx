@@ -7,4 +7,5 @@ export * from "./input";
 export * from "./tooltip";
 export * from "./scroll-area";
 export * from "./separator";
-export * from "./avatar"
+export * from "./avatar";
+export * from "./select";

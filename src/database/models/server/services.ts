@@ -7,13 +7,15 @@ const preparedSelectServerByIdQuery = db
     .select()
     .from(serverSchema)
     .where(eq(serverSchema.id, sql.placeholder("serverId")))
-    .limit(1);
+    .limit(1)
+    .prepare();
 
 const preparedSelectServerByInviteCodeQuery = db
     .select()
     .from(serverSchema)
     .where(eq(serverSchema.inviteCode, sql.placeholder("inviteCode")))
-    .limit(1);
+    .limit(1)
+    .prepare();
 
 export const createServer = async (server: NewServer) => {
     const insertQuery = () => db.insert(serverSchema).values(server);
@@ -55,7 +57,9 @@ export const getServerById = async (serverId: string) => {
 export const getServerByInviteCode = async (inviteCode: string) => {
     const fallback = createFallback("Error selecting server:");
     const selectQuery = async () =>
-        (await preparedSelectServerByInviteCodeQuery.execute({ inviteCode }))[0];
+        (
+            await preparedSelectServerByInviteCodeQuery.execute({ inviteCode })
+        )[0];
     return withTryCatch(selectQuery, fallback)()!;
 };
 

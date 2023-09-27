@@ -2,13 +2,14 @@ import { createFallback, withTryCatch } from "@/lib/utils";
 import { Member, NewMember } from "./schema";
 import { db } from "@/database/db";
 import { memberSchema, profileSchema, serverSchema } from "@/database/models";
-import { eq, sql, and, ne } from "drizzle-orm";
+import { eq, sql, and, ne, SQL } from "drizzle-orm";
 
 const preparedSelectMemberQuery = db
     .select()
     .from(memberSchema)
     .where(eq(memberSchema.id, sql.placeholder("memberId")))
-    .limit(1);
+    .limit(1)
+    .prepare();
 
 const serverExistsPreparedQuery = db
     .selectDistinct({
@@ -21,7 +22,8 @@ const serverExistsPreparedQuery = db
             eq(serverSchema.profileId, sql.placeholder("profileId")),
         ),
     )
-    .limit(1);
+    .limit(1)
+    .prepare();
 
 const selectMembersByServerIdWithProfileQuery = db
     .select({
@@ -46,7 +48,8 @@ const selectMembersByServerIdWithProfileQuery = db
     .from(memberSchema)
     .where(eq(memberSchema.serverId, sql.placeholder("serverId")))
     .innerJoin(profileSchema, eq(memberSchema.profileId, profileSchema.id))
-    .orderBy(memberSchema.role);
+    .orderBy(memberSchema.role)
+    .prepare();
 
 const deleteMemberPreparedQuery = db
     .delete(memberSchema)
@@ -56,7 +59,25 @@ const deleteMemberPreparedQuery = db
             ne(memberSchema.profileId, sql.placeholder("profileId")),
             eq(memberSchema.serverId, sql.placeholder("serverId")),
         ),
-    );
+    )
+    .prepare();
+
+const getMemberByProfileIdAndServerIdQuery = db
+    .select()
+    .from(memberSchema)
+    .where(
+        and(
+            eq(memberSchema.profileId, sql.placeholder("profileId")),
+            eq(memberSchema.serverId, sql.placeholder("serverId")),
+        ),
+    )
+    .prepare();
+
+const getMembersByServerIdQuery = db
+    .select()
+    .from(memberSchema)
+    .where(eq(memberSchema.serverId, sql.placeholder("serverId")))
+    .prepare();
 
 export const createMember = async (member: NewMember) => {
     const insertFallback = createFallback("Error creating member:");
@@ -74,6 +95,33 @@ export const getMembersByServerIdWithProfile = async (serverId: string) => {
         await selectMembersByServerIdWithProfileQuery.execute({ serverId });
     const selectFallback = createFallback("Error selecting members:");
     return withTryCatch(selectQuery, selectFallback)();
+};
+
+export const getMemberByProfileIdAndServerId = async (
+    profileId: string,
+    serverId: string,
+) => {
+    const fallback = createFallback("Error selecting member:");
+    const callback = async () =>
+        getMemberByProfileIdAndServerIdQuery.execute({
+            profileId,
+            serverId,
+        });
+    return withTryCatch(callback, fallback)();
+};
+
+export const getMembersByServerId = async (serverId: string) => {
+    const fallback = createFallback("Error selecting members:");
+    const selectQuery = async () =>
+        await getMembersByServerIdQuery.execute({ serverId });
+    return withTryCatch(selectQuery, fallback)();
+};
+
+export const getMembers = async (whereQuery: SQL<unknown> | undefined) => {
+    const fallback = createFallback("Error selecting members:");
+    const selectQuery = async () =>
+        await db.select().from(memberSchema).where(whereQuery);
+    return withTryCatch(selectQuery, fallback)();
 };
 
 export const updateServerMemberRole = async (
@@ -106,6 +154,16 @@ export const updateServerMemberRole = async (
     };
 
     return withTryCatch(updateQuery, updateFallback)();
+};
+
+export const deleteMemberByMemberId = async (memberId: string) => {
+    const fallback = createFallback("Error deleting member:");
+    const callback = async () => {
+        await db.delete(memberSchema).where(eq(memberSchema.id, memberId));
+        return memberId;
+    };
+
+    return withTryCatch(callback, fallback)();
 };
 
 export const deleteMember = async (

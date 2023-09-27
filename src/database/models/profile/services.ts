@@ -8,7 +8,8 @@ const preparedSelectProfileByUserId = db
     .select()
     .from(profile)
     .where(eq(profile.userId, sql.placeholder("userId")))
-    .limit(1);
+    .limit(1)
+    .prepare();
 
 export function getProfilesByUserId(userId: string) {
     const profileQuery = () =>
