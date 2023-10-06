@@ -78,12 +78,6 @@ export default function ServerHeader({ server, role }: Props) {
                         <DropdownMenuSeparator />
                     </>
                 )}
-                {isAdmin && (
-                    <DropdownMenuItem className="cursor-pointer px-3 py-2 text-sm text-rose-500">
-                        Delete Server
-                        <Trash className="ml-auto h-4 w-4" />
-                    </DropdownMenuItem>
-                )}
                 {!isAdmin && (
                     <DropdownMenuItem
                         onClick={() => onOpen("leaveServer", { server })}
@@ -91,6 +85,15 @@ export default function ServerHeader({ server, role }: Props) {
                     >
                         Leave Server
                         <LogOut className="ml-auto h-4 w-4" />
+                    </DropdownMenuItem>
+                )}
+                {isAdmin && (
+                    <DropdownMenuItem
+                        className="cursor-pointer px-3 py-2 text-sm text-rose-500"
+                        onClick={() => onOpen("deleteServer", { server })}
+                    >
+                        Delete Server
+                        <Trash className="ml-auto h-4 w-4" />
                     </DropdownMenuItem>
                 )}
             </DropdownMenuContent>

@@ -12,11 +12,12 @@ import { useModal } from "@/hooks/use-modal-store";
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-export const LeaveServerModal = () => {
+
+export const DeleteServerModal = () => {
     const { isOpen, onClose, type, data } = useModal();
     const router = useRouter();
 
-    const isModalOpen = isOpen && type === "leaveServer";
+    const isModalOpen = isOpen && type === "deleteServer";
     const { server } = data;
 
     const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,7 @@ export const LeaveServerModal = () => {
     const onClick = async () => {
         setIsLoading(true);
         try {
-            await axios.patch(`/api/servers/${server?.id}/leave`);
+            await axios.delete(`/api/servers/${server?.id}`);
             onClose();
             router.refresh();
             router.push("/");
@@ -40,14 +41,14 @@ export const LeaveServerModal = () => {
             <DialogContent className="overflow-hidden bg-white p-0 text-black">
                 <DialogHeader className="px-6 pt-8">
                     <DialogTitle className="text-center text-2xl font-bold">
-                        Leave Server
+                        Delete Server
                     </DialogTitle>
                     <DialogDescription className="text-center text-zinc-500">
-                        Are you sure you want to leave{" "}
+                        Are you sure you want to do this? <br />
                         <span className="font-semibold text-indigo-500">
                             {server?.name}
-                        </span>
-                        ?
+                        </span>{" "}
+                        will be permanently deleted.
                     </DialogDescription>
                 </DialogHeader>
 

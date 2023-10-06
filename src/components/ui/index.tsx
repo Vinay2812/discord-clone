@@ -9,3 +9,4 @@ export * from "./scroll-area";
 export * from "./separator";
 export * from "./avatar";
 export * from "./select";
+export * from "./command"

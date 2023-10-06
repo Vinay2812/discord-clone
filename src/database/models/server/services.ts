@@ -1,7 +1,7 @@
 import { createFallback, withTryCatch } from "@/lib/utils";
 import { NewServer, Server, server as serverSchema } from "./schema";
 import { db } from "../../db";
-import { SQL, eq, sql } from "drizzle-orm";
+import { SQL, and, eq, sql } from "drizzle-orm";
 
 const preparedSelectServerByIdQuery = db
     .select()
@@ -31,22 +31,6 @@ export const createServer = async (server: NewServer) => {
     return withTryCatch(selectQuery, selectFallback)()!;
 };
 
-export const updateServer = async (
-    server: Partial<Server>,
-    whereQuery: SQL<unknown> | undefined,
-    serverId: string,
-) => {
-    const updateFallback = createFallback("Error updating server:");
-    const updateQuery = () =>
-        db.update(serverSchema).set(server).where(whereQuery);
-
-    await withTryCatch(updateQuery, updateFallback)();
-    const selectQuery = async () =>
-        (await preparedSelectServerByIdQuery.execute({ serverId }))[0];
-    const selectFallback = createFallback("Error selecting server:");
-    return withTryCatch(selectQuery, selectFallback)()!;
-};
-
 export const getServerById = async (serverId: string) => {
     const fallback = createFallback("Error selecting server:");
     const selectQuery = async () =>
@@ -68,4 +52,34 @@ export const getServer = async (whereQuery: SQL<unknown> | undefined) => {
     const selectQuery = async () =>
         (await db.select().from(serverSchema).where(whereQuery).execute())[0];
     return withTryCatch(selectQuery, fallback)()!;
+};
+
+export const updateServer = async (
+    server: Partial<Server>,
+    whereQuery: SQL<unknown> | undefined,
+    serverId: string,
+) => {
+    const updateFallback = createFallback("Error updating server:");
+    const updateQuery = () =>
+        db.update(serverSchema).set(server).where(whereQuery);
+
+    await withTryCatch(updateQuery, updateFallback)();
+    const selectQuery = async () =>
+        (await preparedSelectServerByIdQuery.execute({ serverId }))[0];
+    const selectFallback = createFallback("Error selecting server:");
+    return withTryCatch(selectQuery, selectFallback)()!;
+};
+
+export const deleteServer = async (serverId: string, profileId: string) => {
+    const deleteQuery = () =>
+        db
+            .delete(serverSchema)
+            .where(
+                and(
+                    eq(serverSchema.id, serverId),
+                    eq(serverSchema.profileId, profileId),
+                ),
+            );
+    const deleteFallback = createFallback("Error deleting server:");
+    return await withTryCatch(deleteQuery, deleteFallback)();
 };

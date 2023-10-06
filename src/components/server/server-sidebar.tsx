@@ -1,4 +1,3 @@
-import React from "react";
 import { currentProfile } from "@/lib/current-profile";
 import { redirect } from "next/navigation";
 import { db } from "@/database/db";
@@ -12,6 +11,9 @@ import { Channel } from "@/database/models/channel/schema";
 import { eq, sql } from "drizzle-orm";
 import { createFallback, withTryCatch } from "@/lib/utils";
 import ServerHeader from "./server-header";
+// import { ScrollArea } from "@/components/ui";
+import ServerSearch from "./server-search";
+import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 
 type Props = {
     serverId: string;
@@ -75,6 +77,18 @@ function getServer(serverId: string) {
     return withTryCatch(callback, fallback)();
 }
 
+const iconMap = {
+    TEXT: <Hash className="mr-2 h-4 w-4" />,
+    AUDIO: <Mic className="mr-2 h-4 w-4" />,
+    VIDEO: <Video className="mr-2 h-4 w-4" />,
+};
+
+const roleIconMap = {
+    GUEST: null,
+    MODERATOR: <ShieldCheck className="mr-2 h-4 w-4 text-indigo-500" />,
+    ADMIN: <ShieldAlert className="mr-2 h-4 w-4 text-rose-500" />,
+};
+
 export default async function ServerSidebar({ serverId }: Props) {
     const profile = await currentProfile();
 
@@ -117,6 +131,46 @@ export default async function ServerSidebar({ serverId }: Props) {
     return (
         <div className="flex h-full w-full flex-col bg-[#F2F3F5] text-primary dark:bg-[#2B2B31]">
             <ServerHeader server={server} role={role} />
+            <ServerSearch
+                data={[
+                    {
+                        label: "Text Channels",
+                        type: "channel",
+                        data: textChannels.map((channel) => ({
+                            icon: iconMap[channel.type],
+                            name: channel.name,
+                            id: channel.id,
+                        })),
+                    },
+                    {
+                        label: "Voice Channels",
+                        type: "channel",
+                        data: audioChannels.map((channel) => ({
+                            icon: iconMap[channel.type],
+                            name: channel.name,
+                            id: channel.id,
+                        })),
+                    },
+                    {
+                        label: "Video Channels",
+                        type: "channel",
+                        data: videoChannels.map((channel) => ({
+                            icon: iconMap[channel.type],
+                            name: channel.name,
+                            id: channel.id,
+                        })),
+                    },
+                    {
+                        label: "Members",
+                        type: "member",
+                        data: members.map((member) => ({
+                            icon: roleIconMap[member.role],
+                            name: member.profile.name,
+                            id: member.id,
+                        })),
+                    },
+                ]}
+            />
         </div>
     );
 }

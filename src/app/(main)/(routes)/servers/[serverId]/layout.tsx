@@ -41,8 +41,11 @@ function getUserServer(serverId: string, profileId: string) {
 
 export default async function ServerIdLayout({ children, params }: Props) {
     const profile = await currentProfile();
+    // if (!profile) {
+    //     return redirectToSignIn();
+    // }
     if (!profile) {
-        return redirectToSignIn();
+        return redirect("/");
     }
     const server = await getUserServer(params.serverId, profile.id);
 

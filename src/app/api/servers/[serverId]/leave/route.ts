@@ -9,7 +9,7 @@ import { currentProfile } from "@/lib/current-profile";
 import { withTryCatch } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
-export async function DELETE(
+export async function PATCH(
     req: Request,
     {
         params,

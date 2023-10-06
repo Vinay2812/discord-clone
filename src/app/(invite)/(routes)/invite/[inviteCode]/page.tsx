@@ -52,11 +52,11 @@ async function insertMemberToServer(
 
 export default async function InviteCodePage({ params }: Props) {
     const profile = await currentProfile();
-    if (!profile) {
-        return redirectToSignIn();
-    }
+    // if (!profile) {
+    //     return redirectToSignIn();
+    // }
 
-    if (!params.inviteCode) {
+    if (!profile || !params.inviteCode) {
         return redirect("/");
     }
 
