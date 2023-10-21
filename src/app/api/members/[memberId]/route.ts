@@ -5,6 +5,7 @@ import {
 } from "@/database/models/member/services";
 import { getServerById } from "@/database/models/server/services";
 import { currentProfile } from "@/lib/current-profile";
+import { serverWithMembersAndProfiles } from "@/lib/server-with-members";
 import { withTryCatch } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
@@ -43,21 +44,20 @@ export async function PATCH(
             role,
         );
 
-        const server = await getServerById(updatedServerId);
-        const membersAndProfiles =
-            await getMembersByServerIdWithProfile(updatedServerId);
+        // const server = await getServerById(updatedServerId);
+        // const membersWithProfiles =
+        //     await getMembersByServerIdWithProfile(updatedServerId);
 
-        const membersWithProfile = membersAndProfiles.map((member) => {
-            return {
-                ...member.member,
-                profile: member.profile,
-            };
-        });
+        // const membersWithProfile = membersAndProfiles.map((member) => {
+        //     return {
+        //         ...member.member,
+        //         profile: member.profile,
+        //     };
+        // });
 
-        return NextResponse.json({
-            ...server,
-            members: membersWithProfile,
-        });
+        const server = await serverWithMembersAndProfiles(updatedServerId);
+
+        return NextResponse.json(server);
     };
 
     return withTryCatch(callback, fallback)();
@@ -96,21 +96,20 @@ export async function DELETE(
             profile.id,
         );
 
-        const server = await getServerById(updatedServerId);
-        const membersAndProfiles =
-            await getMembersByServerIdWithProfile(updatedServerId);
+        // const server = await getServerById(updatedServerId);
+        // const membersWithProfiles =
+        //     await getMembersByServerIdWithProfile(updatedServerId);
 
-        const membersWithProfile = membersAndProfiles.map((member) => {
-            return {
-                ...member.member,
-                profile: member.profile,
-            };
-        });
+        // const membersWithProfile = membersAndProfiles.map((member) => {
+        //     return {
+        //         ...member.member,
+        //         profile: member.profile,
+        //     };
+        // });
 
-        return NextResponse.json({
-            ...server,
-            members: membersWithProfile,
-        });
+        const server = await serverWithMembersAndProfiles(updatedServerId);
+
+        return NextResponse.json(server);
     };
 
     return withTryCatch(callback, fallback)();

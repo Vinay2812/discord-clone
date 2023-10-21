@@ -1,11 +1,10 @@
 import { memberSchema } from "@/database/models";
 import {
     createChannel,
-    getChannelsByServerId,
 } from "@/database/models/channel/services";
 import { getMembers } from "@/database/models/member/services";
-import { getServerById } from "@/database/models/server/services";
 import { currentProfile } from "@/lib/current-profile";
+import { serverWithMembersAndProfiles } from "@/lib/server-with-members";
 import { uniqueId, withTryCatch } from "@/lib/utils";
 import { and, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -53,15 +52,8 @@ export async function POST(req: Request) {
             serverId,
             profileId: profile.id,
         });
-
-        const server = await getServerById(serverId);
-        const channels = await getChannelsByServerId(serverId);
-
-        return NextResponse.json({
-            ...server,
-            channels,
-            members,
-        });
+        const server = await serverWithMembersAndProfiles(serverId);
+        return NextResponse.json(server);
     };
     return withTryCatch(callback, fallback)();
 }

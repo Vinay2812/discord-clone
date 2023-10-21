@@ -12,7 +12,7 @@ import { eq, sql } from "drizzle-orm";
 import { createFallback, withTryCatch } from "@/lib/utils";
 import ServerHeader from "./server-header";
 // import { ScrollArea } from "@/components/ui";
-import ServerSearch from "./server-search";
+import ServerSidebarContent from "./server-sidebar-content";
 import { Hash, Mic, ShieldAlert, ShieldCheck, Video } from "lucide-react";
 
 type Props = {
@@ -131,8 +131,8 @@ export default async function ServerSidebar({ serverId }: Props) {
     return (
         <div className="flex h-full w-full flex-col bg-[#F2F3F5] text-primary dark:bg-[#2B2B31]">
             <ServerHeader server={server} role={role} />
-            <ServerSearch
-                data={[
+            <ServerSidebarContent
+                searchData={[
                     {
                         label: "Text Channels",
                         type: "channel",
@@ -170,6 +170,14 @@ export default async function ServerSidebar({ serverId }: Props) {
                         })),
                     },
                 ]}
+                channels={{
+                    audioChannels,
+                    textChannels,
+                    videoChannels,
+                }}
+                role={role}
+                server={server}
+                members={members}
             />
         </div>
     );

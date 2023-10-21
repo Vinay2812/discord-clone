@@ -94,7 +94,14 @@ export const getMembersByServerIdWithProfile = async (serverId: string) => {
     const selectQuery = async () =>
         await selectMembersByServerIdWithProfileQuery.execute({ serverId });
     const selectFallback = createFallback("Error selecting members:");
-    return withTryCatch(selectQuery, selectFallback)();
+    const membersAndProfiles =  await withTryCatch(selectQuery, selectFallback)();
+    const membersWithProfiles = membersAndProfiles?.map((member) => {
+        return {
+            ...member.member,
+            profile: member.profile,
+        };
+    });
+    return membersWithProfiles;
 };
 
 export const getMemberByProfileIdAndServerId = async (
