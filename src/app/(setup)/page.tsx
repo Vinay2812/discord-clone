@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { InitialModal } from "../../components/modals";
 import { createFallback, withTryCatch } from "../../lib/utils";
+export const dynamic = "force-dynamic"
 
 const userServersPreparedQuery = db
     .select({
@@ -16,17 +17,17 @@ const userServersPreparedQuery = db
     .limit(1)
     .prepare();
 
-function getUserServers(profileId: string) {
-    const fallback = createFallback(`Failed to get servers`);
-    const callback = () => {
-        return userServersPreparedQuery.execute({
-            profileId,
-        });
-    };
-    return withTryCatch(callback, fallback)();
-}
-
 const SetupPage = async () => {
+    function getUserServers(profileId: string) {
+        const fallback = createFallback(`Failed to get servers`);
+        const callback = () => {
+            return userServersPreparedQuery.execute({
+                profileId,
+            });
+        };
+        return withTryCatch(callback, fallback)();
+    }
+
     const profile = await initialProfile();
     const servers = await getUserServers(profile.id);
     if (servers.length > 0) {

@@ -1,6 +1,5 @@
 import React from "react";
 import { currentProfile } from "@/lib/current-profile";
-import { redirectToSignIn } from "@clerk/nextjs";
 import { db } from "@/database/db";
 import { memberSchema, serverSchema } from "@/database/models";
 import { eq, sql } from "drizzle-orm";
